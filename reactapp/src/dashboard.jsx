@@ -1,41 +1,22 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import apiClient from './apiClient';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 const DashboardPage = () => {
     const [sumvalue, setsum] = useState([]); // State to hold the data
     const [dashData, setDashData] = useState([]); // State for storing computed chart data
-    const [error, setError] = useState(null); // For handling errors
-
-    // Function to update values based on name
-    const updateValue = (name, newValue) => {
-        setDashData(prevData => {
-            // Find the item by name and update its value
-            const updatedData = prevData.map(item =>
-                item.name === name ? { ...item, value: newValue } : item
-            );
-            return updatedData;
-        });
-    };
 
     useEffect(() => {
-        // Fetch data from the backend API
-        fetch("https://webapiforproperly.azurewebsites.net/api/Apartment") // Adjust API URL accordingly
+        apiClient.get('/api/Apartment')
             .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
-            .then((data) => {
+                const data = response.data;
                 if (data.length > 0) {
-                    setsum(data[0]); // Set the data in the state
+                    setsum(data[0]);
                 }
             })
-            .catch((error) => {
-                setError(error.message); // Handle errors
-            });
+            .catch(() => {});
     }, []); // This runs only once when the component mounts
 
     useEffect(() => {
