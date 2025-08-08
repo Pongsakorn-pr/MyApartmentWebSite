@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import { useState } from 'react';
+import apiClient from './apiClient';
 import { useNavigate } from 'react-router-dom';
 
+// eslint-disable-next-line react/prop-types
 const LoginPage = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
+    const [showPassword] = useState(false);
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
@@ -25,7 +26,7 @@ const LoginPage = ({ onLogin }) => {
         };
 
         try {
-            const response = await axios.post("https://webapiforproperly.azurewebsites.net/api/Login", dataObj, {
+            await apiClient.post('/api/Login', dataObj, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'

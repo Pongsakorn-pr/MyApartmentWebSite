@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Form, Button } from 'react-bootstrap';
-import axios from 'axios';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import apiClient from './apiClient';
+import { useLocation, Link } from 'react-router-dom';
 import { ArrowLeftSquare } from 'react-bootstrap-icons';
 const AddDataPage = () => {
     const { state } = useLocation(); // Get data passed from the previous page
-    const navigate = useNavigate();
     const currentDate = new Date();
     const [dis, setdis] = useState(true);
     const [formData, setFormData] = useState([]);
@@ -45,19 +44,19 @@ const AddDataPage = () => {
                     year: currentDate.getFullYear()+543
                 };
                 console.log(dataObj);
-                const respon = await axios.post(`https://webapiforproperly.azurewebsites.net/api/Apartment/oldMeter`, dataObj);
-                console.log(respon);
-                if (respon.status === 200) { // Check the response status
+                const response = await apiClient.post('/api/Apartment/oldMeter', dataObj);
+                console.log(response);
+                if (response.status === 200) { // Check the response status
                     var newWater = 0;
-                    if (respon.data.length > 0) {
-                        newWater = respon.data[0].water_reading_meter;
+                    if (response.data.length > 0) {
+                        newWater = response.data[0].water_reading_meter;
                     }
                     formData.previous_meter_month = newWater;
                     formData.bill_month_year = currentDate.toLocaleDateString('en-GB');
                     console.log("Finished");
                     setdis(false);
                 } else {
-                    console.error("Error in response:", respon);
+                    console.error("Error in response:", response);
                 }
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -92,9 +91,9 @@ const AddDataPage = () => {
             item.BAHT = '=BAHTTEXT(' + item.total_amount + ')';
             item.Month_TH = '=TEXT((' + item.bill_month_year + '), "MMMM") & " " & TEXT(' + (item.Year+543) + ', "0")';
             console.log(item);
-            const respon = await axios.post(`https://webapiforproperly.azurewebsites.net/api/Apartment`, item);
-            console.log(respon);
-            if (respon.status === 201) {
+            const response = await apiClient.post('/api/Apartment', item);
+            console.log(response);
+            if (response.status === 201) {
                 console.log("Successful");
                 // Reset the data to default
                 var newDataObject = DefaultDataObject;
