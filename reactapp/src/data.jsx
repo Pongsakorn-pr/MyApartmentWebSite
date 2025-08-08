@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { Button, Table, Modal, Alert } from 'react-bootstrap';
+import { useState, useEffect } from "react";
+import { Button, Table, Modal } from 'react-bootstrap';
 import { PencilSquare, Trash, Printer, HouseAdd } from 'react-bootstrap-icons';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import axios from 'axios';
+import apiClient from './apiClient';
 
 const DataPage = () => {
     const [data, setData] = useState([]);
-    const [error, setError] = useState(null);
     const [count, setCount] = useState(0);
     const navigate = useNavigate();
     const [tempData, setDatatmp] = useState([]);
@@ -21,15 +20,15 @@ const DataPage = () => {
         var requestRowIndex = {
             rowIndex: item.bill_id
         };
-        axios.post('https://webapiforproperly.azurewebsites.net/api/Apartment/PdfBill', requestRowIndex, {
-            responseType: 'blob' // Important to handle binary data (PDF)
+        apiClient.post('/api/Apartment/PdfBill', requestRowIndex, {
+            responseType: 'blob'
         })
             .then(response => {
                 const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
                 const link = document.createElement('a');
                 var filename = item.month + '_' + item.year + '_Bill_' + item.room_number + '.pdf';
                 link.href = url;
-                link.setAttribute('download', filename); // Set the file name
+                link.setAttribute('download', filename);
                 document.body.appendChild(link);
                 link.click();
             })
@@ -41,7 +40,7 @@ const DataPage = () => {
         try {
             // Use the actual ID of the item
             var id = item.bill_id + 1;
-           await axios.delete(`https://webapiforproperly.azurewebsites.net/api/Apartment/${id}`);
+           await apiClient.delete(`/api/Apartment/${id}`);
             navigate('/');
         } catch (error) {
             console.error("Error deleting data:", error);
@@ -55,25 +54,17 @@ const DataPage = () => {
         navigate(`/Edit/${item.bill_id}`, { state: { data: item } });
     };
     useEffect(() => {
-        fetch("https://webapiforproperly.azurewebsites.net/api/Apartment") 
+        apiClient.get('/api/Apartment')
             .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
-            .then((data) => {
+                const data = response.data;
                 if (data.length > 0) {
                     setCount(data[1]);
-                    setData(data[0]); // Set the data in the state
-                }
-                else {
+                    setData(data[0]);
+                } else {
                     setCount(0);
                 }
             })
-            .catch((error) => {
-                setError(error.message); // Handle errors
-            });
+            .catch(() => {});
     }, []);
     return (
         // Div for Alert Box
@@ -163,12 +154,5 @@ const DataPage = () => {
             </Table>
         </div>
     );
-};
-const style = {
-    // Table custom styles can go here if needed
-    tableBill: {
-        width: '100%',
-        marginTop: '20px',
-    },
 };
 export default DataPage;

@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Button} from 'react-bootstrap';
-import axios from 'axios';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Form, Button } from 'react-bootstrap';
+import apiClient from './apiClient';
+import { useLocation, Link } from 'react-router-dom';
 import { ArrowLeftSquare } from 'react-bootstrap-icons';
 const EditDataPage = () => {
     const { state } = useLocation(); // Get data passed from the previous page
-    const navigate = useNavigate();
     const [formData, setFormData] = useState(state ? state.data : {});
 
     useEffect(() => {
@@ -36,10 +35,9 @@ const EditDataPage = () => {
     };
 
     const handleSubmit = async (event,item) => {
-        e.preventDefault();
+        event.preventDefault();
         try {
-            // Adjust the API URL as needed
-            await axios.put(`https://webapiforproperly.azurewebsites.net/api/Apartment/${formData.bill_id+1}`, item);
+            await apiClient.put(`/api/Apartment/${formData.bill_id+1}`, item);
             console.log("Data updated", item);
         } catch (error) {
             console.error("Error editing data:", error);
